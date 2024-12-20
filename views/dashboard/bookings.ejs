@@ -1,0 +1,161 @@
+<%- include('../partials/dashboard-header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm font-medium">Total Bookings</h3>
+            <p class="text-3xl font-bold text-gray-900"><%= stats.totalBookings %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm font-medium">Active Bookings</h3>
+            <p class="text-3xl font-bold text-green-600"><%= stats.activeBookings %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm font-medium">Pending Bookings</h3>
+            <p class="text-3xl font-bold text-yellow-600"><%= stats.pendingBookings %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm font-medium"><%= user.role === 'owner' ? 'Total Revenue' : 'Total Spent' %></h3>
+            <p class="text-3xl font-bold text-blue-600">$<%= stats.totalRevenue.toLocaleString() %></p>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <%= user.role === 'owner' ? 'Booking Requests' : 'My Bookings' %>
+            </h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <%= user.role === 'owner' ? 'Guest' : 'Host' %>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% if (bookings && bookings.length > 0) { %>
+                        <% bookings.forEach(booking => { %>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" 
+                                                src="<%= booking.property.images[0] %>" 
+                                                alt="<%= booking.property.title %>">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <%= booking.property.title %>
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <%= booking.property.location.city %>, <%= booking.property.location.country %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        <%= moment(booking.startDate).format('MMM D, YYYY') %> - 
+                                        <%= moment(booking.endDate).format('MMM D, YYYY') %>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        <%= booking.duration %> nights
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 rounded-full overflow-hidden">
+                                            <img src="<%= user.role === 'owner' ? booking.renter.profileImage : booking.property.owner.profileImage %>" 
+                                                 alt="Profile" 
+                                                 class="h-full w-full object-cover">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <%= user.role === 'owner' ? booking.renter.name : booking.property.owner.name %>
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <%= user.role === 'owner' ? booking.renter.email : booking.property.owner.email %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">$<%= booking.totalAmount.toLocaleString() %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        <%= booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                           booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                           booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                           'bg-red-100 text-red-800' %>">
+                                        <%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <% if (user.role === 'owner' && booking.status === 'pending') { %>
+                                        <button onclick="updateBookingStatus('<%= booking._id %>', 'confirmed')"
+                                                class="text-green-600 hover:text-green-900 mr-3">
+                                            Accept
+                                        </button>
+                                        <button onclick="updateBookingStatus('<%= booking._id %>', 'cancelled')"
+                                                class="text-red-600 hover:text-red-900">
+                                            Decline
+                                        </button>
+                                    <% } else if (booking.canCancel) { %>
+                                        <button onclick="updateBookingStatus('<%= booking._id %>', 'cancelled')"
+                                                class="text-red-600 hover:text-red-900">
+                                            Cancel
+                                        </button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                No bookings found
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateBookingStatus(bookingId, status) {
+    try {
+        const response = await fetch(`/api/bookings/${bookingId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update booking status');
+        }
+
+        // Reload the page to show updated status
+        window.location.reload();
+    } catch (error) {
+        console.error('Error updating booking status:', error);
+        alert('Failed to update booking status. Please try again.');
+    }
+}
+</script>
+
+<%- include('../partials/dashboard-footer') %> 

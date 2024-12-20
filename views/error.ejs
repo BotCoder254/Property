@@ -1,0 +1,39 @@
+<%- contentFor('body') %>
+
+<div class="min-h-screen bg-gray-100 flex flex-col justify-center items-center px-4">
+    <div class="max-w-lg w-full bg-white rounded-lg shadow-lg p-8 text-center">
+        <div class="mb-8">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <lottie-player
+                src="https://assets2.lottiefiles.com/packages/lf20_error404.json"
+                background="transparent"
+                speed="1"
+                style="width: 300px; height: 300px; margin: 0 auto;"
+                loop
+                autoplay>
+            </lottie-player>
+        </div>
+
+        <h1 class="text-4xl font-bold text-gray-800 mb-4"><%= title %></h1>
+        <p class="text-gray-600 text-lg mb-8"><%= message %></p>
+
+        <% if (process.env.NODE_ENV === 'development' && error.stack) { %>
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                <p class="text-left text-sm font-mono text-gray-600 whitespace-pre-wrap"><%= error.stack %></p>
+            </div>
+        <% } %>
+
+        <div class="mt-8 space-x-4">
+            <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                Go Home
+            </a>
+            <button onclick="window.history.back()" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                Go Back
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-8 text-center text-gray-500">
+        <p>If you continue to experience issues, please contact support.</p>
+    </div>
+</div> 
